@@ -1,9 +1,9 @@
 import unittest
 
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, LeafNode
 
 
-class TextHTMLNode(unittest.TestCase):
+class TestHTMLNode(unittest.TestCase):
     def test_to_html(self):
         html = HTMLNode()
         self.assertRaises(NotImplementedError, html.to_html)
@@ -21,3 +21,21 @@ class TextHTMLNode(unittest.TestCase):
     def test_repr(self):
         html = HTMLNode(tag="p", value="hello world")
         self.assertEqual(html.__repr__(), "HTMLNode(p, hello world, None, None)")
+
+
+class TestLeafNode(unittest.TestCase):
+    def test_to_html(self):
+        leaf = LeafNode("p", "This is a paragraph of text.")
+        leaf1 = LeafNode("a", "Click me!", {"href": "https://www.google.com"})
+        self.assertEqual(leaf.to_html(), "<p>This is a paragraph of text.</p>")
+        self.assertEqual(
+            leaf1.to_html(), '<a href="https://www.google.com">Click me!</a>'
+        )
+
+    def test_to_html_errors(self):
+        leaf = LeafNode("p", None)
+        self.assertRaises(ValueError, leaf.to_html)
+
+    def test_html_without_tags(self):
+        leaf = LeafNode(None, "This is a paragraph of text.")
+        self.assertEqual(leaf.to_html(), "This is a paragraph of text.")

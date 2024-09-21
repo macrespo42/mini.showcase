@@ -91,3 +91,7 @@ class TestParentNode(unittest.TestCase):
             ValueError,
             node.to_html,
         )
+
+
+if __name__ == "__main__":
+    unittest.main()

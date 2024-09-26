@@ -1,18 +1,24 @@
 import re
 
-from textnode import TextNode, text_type_image, text_type_link, text_type_text
+from textnode import (
+    TextNode,
+    text_type_bold,
+    text_type_code,
+    text_type_image,
+    text_type_italic,
+    text_type_link,
+    text_type_text,
+)
 
 
-def split_nodes_delimiter(
-    old_nodes: list[TextNode], delimiter: str, text_type: str
-) -> list[TextNode]:
+def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
-    for node in old_nodes:
-        if node.text_type != text_type_text:
-            new_nodes.append(node)
+    for old_node in old_nodes:
+        if old_node.text_type != text_type_text:
+            new_nodes.append(old_node)
             continue
         split_nodes = []
-        sections = node.text.split(delimiter)
+        sections = old_node.text.split(delimiter)
         if len(sections) % 2 == 0:
             raise ValueError("Invalid markdown, formatted section not closed")
         for i in range(len(sections)):
@@ -23,7 +29,7 @@ def split_nodes_delimiter(
             else:
                 split_nodes.append(TextNode(sections[i], text_type))
         new_nodes.extend(split_nodes)
-        return new_nodes
+    return new_nodes
 
 
 def extract_markdown_images(text: str):
@@ -81,9 +87,11 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
     return new_nodes
 
 
-if __name__ == "__main__":
-    node = TextNode(
-        "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)",
-        text_type_text,
-    )
-    print(split_nodes_link([node]))
+def text_to_textnodes(text):
+    nodes = [TextNode(text, text_type_text)]
+    nodes = split_nodes_delimiter(nodes, "**", text_type_bold)
+    nodes = split_nodes_delimiter(nodes, "*", text_type_italic)
+    nodes = split_nodes_delimiter(nodes, "`", text_type_code)
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
+    return nodes

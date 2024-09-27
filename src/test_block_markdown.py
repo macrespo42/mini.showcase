@@ -131,7 +131,7 @@ class TestMarkdownToBlock(unittest.TestCase):
 class TestBlockToBlockType(unittest.TestCase):
     def test_header(self):
         block = "### hello world!"
-        self.assertEqual(block_to_block_type(block), "header")
+        self.assertEqual(block_to_block_type(block), "h3")
 
     def test_invalid_header(self):
         block = "###helloworld"
@@ -154,11 +154,11 @@ class TestBlockToBlockType(unittest.TestCase):
 
     def test_unordered_list(self):
         block = "* lol\n* tbh\n* tbh"
-        self.assertEqual(block_to_block_type(block), "unordered_list")
+        self.assertEqual(block_to_block_type(block), "ul")
         block = "- lol\n- tbh\n- tbh"
-        self.assertEqual(block_to_block_type(block), "unordered_list")
+        self.assertEqual(block_to_block_type(block), "ul")
         block = "- lol\n- tbh\n* tbh"
-        self.assertEqual(block_to_block_type(block), "unordered_list")
+        self.assertEqual(block_to_block_type(block), "ul")
 
     def test_invalid_unordered_list(self):
         block = "*lol\n* tbh\n* tbh"
@@ -168,7 +168,7 @@ class TestBlockToBlockType(unittest.TestCase):
 
     def test_ordered_list(self):
         block = "1. lol\n2. tbh\n3. tbh"
-        self.assertEqual(block_to_block_type(block), "ordered_list")
+        self.assertEqual(block_to_block_type(block), "ol")
 
     def test_invalid_ordered_list(self):
         block = "1. lol\n4. tbh\n3. tbh"

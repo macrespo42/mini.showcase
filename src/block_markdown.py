@@ -1,3 +1,7 @@
+from htmlnode import HTMLNode
+from textnode import TextNode, text_type_text
+
+
 def markdown_to_block(text: str) -> list[str]:
     blocks = text.split("\n\n")
     blocks = [block.strip() for block in blocks if block != ""]
@@ -62,12 +66,28 @@ def is_ordered_list(block: str) -> bool:
 
 def block_to_block_type(block: str) -> str:
     if is_header(block):
-        return "header"
+        heading_level = 0
+        while block[heading_level] == "#":
+            heading_level += 1
+        return f"h{heading_level}"
     elif is_code(block):
         return "code"
     elif is_unordered_list(block):
-        return "unordered_list"
+        return "ul"
     elif is_ordered_list(block):
-        return "ordered_list"
+        return "ol"
     else:
         return "p"
+
+
+def markdown_to_html_node(markdown: str) -> HTMLNode:
+    blocks = markdown_to_block(markdown)
+    childrens = []
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        html_block = HTMLNode(
+            tag=block_type,
+            value=TextNode(block, text_type_text),
+        )
+        childrens.append(html_block)
+    return HTMLNode("div", children=childrens)

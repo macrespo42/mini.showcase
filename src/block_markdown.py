@@ -1,5 +1,6 @@
-from htmlnode import HTMLNode
-from textnode import TextNode, text_type_text
+from htmlnode import LeafNode, ParentNode
+from inline_markdown import text_to_textnodes
+from textnode import text_node_to_html_node
 
 
 def markdown_to_block(text: str) -> list[str]:
@@ -66,10 +67,7 @@ def is_ordered_list(block: str) -> bool:
 
 def block_to_block_type(block: str) -> str:
     if is_header(block):
-        heading_level = 0
-        while block[heading_level] == "#":
-            heading_level += 1
-        return f"h{heading_level}"
+        return "h"
     elif is_code(block):
         return "code"
     elif is_unordered_list(block):
@@ -80,14 +78,79 @@ def block_to_block_type(block: str) -> str:
         return "p"
 
 
-def markdown_to_html_node(markdown: str) -> HTMLNode:
+def text_to_children(text: str) -> list[LeafNode]:
+    text_nodes = text_to_textnodes(text)
+    children = []
+    for text_node in text_nodes:
+        html_node = text_node_to_html_node(text_node)
+        children.append(html_node)
+    return children
+
+
+def paragraph_to_html_node(block: str) -> ParentNode:
+    lines = block.split("\n")
+    paragraph = " ".join(lines)
+    children = text_to_children(paragraph)
+    return ParentNode("p", children)
+
+
+def header_to_html_node(block: str) -> ParentNode:
+    header_level = 0
+    while block[header_level] == "#":
+        header_level += 1
+    if header_level + 1 > len(block):
+        raise ("Invalid block: header level to high")
+    children = text_to_children(block[header_level + 1 :])
+    return ParentNode(f"h{header_level}", children)
+
+
+def code_to_html_node(block: str) -> ParentNode:
+    text = block[4:-3]
+    children = text_to_children(text)
+    code = ParentNode("code", children)
+    return ParentNode("pre", [code])
+
+
+def unordered_list_to_html(block: str) -> ParentNode:
+    lines = block.split("\n")
+    children = []
+    for line in lines:
+        print(line[2:])
+        li_child = text_to_children(line[2:])
+        children.append(ParentNode("li", li_child))
+    return ParentNode("ul", children)
+
+
+def ordered_list_to_html(block: str) -> ParentNode:
+    lines = block.split("\n")
+    children = []
+    for line in lines:
+        li_value = line[3:]
+        li_child = text_to_children(li_value)
+        children.append(ParentNode("li", li_child))
+    return ParentNode("ol", children)
+
+
+def block_to_html_node(block: str) -> ParentNode:
+    block_type = block_to_block_type(block)
+    if block_type == "p":
+        return paragraph_to_html_node(block)
+    elif block_type == "h":
+        return header_to_html_node(block)
+    elif block_type == "code":
+        return code_to_html_node(block)
+    elif block_type == "ul":
+        return unordered_list_to_html(block)
+    elif block_type == "ol":
+        return ordered_list_to_html(block)
+    else:
+        raise ("Invalid block: block type not found")
+
+
+def markdown_to_html_node(markdown: str) -> ParentNode:
     blocks = markdown_to_block(markdown)
     childrens = []
     for block in blocks:
-        block_type = block_to_block_type(block)
-        html_block = HTMLNode(
-            tag=block_type,
-            value=TextNode(block, text_type_text),
-        )
-        childrens.append(html_block)
-    return HTMLNode("div", children=childrens)
+        node = block_to_html_node(block)
+        childrens.append(node)
+    return ParentNode("div", children=childrens)

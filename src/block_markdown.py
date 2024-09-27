@@ -27,13 +27,9 @@ def is_header(block: str) -> bool:
 def is_code(block: str) -> bool:
     if len(block) < 6:
         return False
-    if block[0:3] == "```" and block[-3:] == "```":
-        lines = block.split("\n")
-        for line in lines[1:-1]:
-            if line[0] != ">":
-                return False
+    lines = block.split("\n")
+    if len(lines) > 1 and lines[0].startswith("```") and lines[-1].endswith("```"):
         return True
-
     return False
 
 
@@ -65,11 +61,22 @@ def is_ordered_list(block: str) -> bool:
     return True
 
 
+def is_blockquote(block: str) -> bool:
+    lines = block.split("\n")
+    if block.startswith(">"):
+        for line in lines:
+            if not line.startswith(">"):
+                return False
+        return True
+
+
 def block_to_block_type(block: str) -> str:
     if is_header(block):
         return "h"
     elif is_code(block):
         return "code"
+    elif is_blockquote(block):
+        return "blockquote"
     elif is_unordered_list(block):
         return "ul"
     elif is_ordered_list(block):
@@ -124,10 +131,21 @@ def ordered_list_to_html(block: str) -> ParentNode:
     lines = block.split("\n")
     children = []
     for line in lines:
-        li_value = line[3:]
-        li_child = text_to_children(li_value)
+        li_child = text_to_children(line[3:])
         children.append(ParentNode("li", li_child))
     return ParentNode("ol", children)
+
+
+def blockquote_to_html(block: str) -> ParentNode:
+    lines = block.split("\n")
+    new_lines = []
+    for line in lines:
+        if not line.startswith(">"):
+            raise ValueError("Invalid quote block")
+        new_lines.append(line.lstrip(">").strip())
+    content = " ".join(new_lines)
+    children = text_to_children(content)
+    return ParentNode("blockquote", children)
 
 
 def block_to_html_node(block: str) -> ParentNode:
@@ -142,6 +160,8 @@ def block_to_html_node(block: str) -> ParentNode:
         return unordered_list_to_html(block)
     elif block_type == "ol":
         return ordered_list_to_html(block)
+    elif block_type == "blockquote":
+        return blockquote_to_html(block)
     else:
         raise ValueError("Invalid block: block type not found")
 

@@ -146,12 +146,10 @@ class TestBlockToBlockType(unittest.TestCase):
         self.assertEqual(block_to_block_type(block), "p")
 
     def test_code(self):
-        block = "```> code1\n> code2\n> code3```"
+        block = "```code1\ncode2\ncode3```"
         self.assertEqual(block_to_block_type(block), "code")
 
     def test_invalid_code(self):
-        block = "```> code1\ncode2\n> code3```"
-        self.assertEqual(block_to_block_type(block), "p")
         block = ""
         self.assertEqual(block_to_block_type(block), "p")
         block = "`````"
@@ -182,6 +180,10 @@ class TestBlockToBlockType(unittest.TestCase):
         self.assertEqual(block_to_block_type(block), "p")
         block = "0. lol\n1. tbh\n3. tbh"
         self.assertEqual(block_to_block_type(block), "p")
+
+    def test_blockquote(self):
+        block = "> b1\n> b2\n> b3"
+        self.assertEqual(block_to_block_type(block), "blockquote")
 
 
 class TextMarkdownToHtmlNode(unittest.TestCase):

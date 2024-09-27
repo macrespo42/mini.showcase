@@ -99,7 +99,7 @@ def header_to_html_node(block: str) -> ParentNode:
     while block[header_level] == "#":
         header_level += 1
     if header_level + 1 > len(block):
-        raise ("Invalid block: header level to high")
+        raise ValueError("Invalid block: header level to high")
     children = text_to_children(block[header_level + 1 :])
     return ParentNode(f"h{header_level}", children)
 
@@ -144,7 +144,7 @@ def block_to_html_node(block: str) -> ParentNode:
     elif block_type == "ol":
         return ordered_list_to_html(block)
     else:
-        raise ("Invalid block: block type not found")
+        raise ValueError("Invalid block: block type not found")
 
 
 def markdown_to_html_node(markdown: str) -> ParentNode:

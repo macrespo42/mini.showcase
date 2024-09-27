@@ -115,7 +115,6 @@ def unordered_list_to_html(block: str) -> ParentNode:
     lines = block.split("\n")
     children = []
     for line in lines:
-        print(line[2:])
         li_child = text_to_children(line[2:])
         children.append(ParentNode("li", li_child))
     return ParentNode("ul", children)
@@ -154,3 +153,11 @@ def markdown_to_html_node(markdown: str) -> ParentNode:
         node = block_to_html_node(block)
         childrens.append(node)
     return ParentNode("div", children=childrens)
+
+
+def extract_title(markdown: str):
+    blocks = markdown_to_block(markdown)
+    header = blocks[0]
+    if not header.startswith("# "):
+        raise ValueError("Invalid markdown: the file doesn't start with a title")
+    return header.lstrip("#").strip()

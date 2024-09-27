@@ -1,6 +1,11 @@
 import unittest
 
-from block_markdown import block_to_block_type, markdown_to_block, markdown_to_html_node
+from block_markdown import (
+    block_to_block_type,
+    extract_title,
+    markdown_to_block,
+    markdown_to_html_node,
+)
 
 
 class TestMarkdownToBlock(unittest.TestCase):
@@ -207,3 +212,35 @@ class TextMarkdownToHtmlNode(unittest.TestCase):
             html.to_html(),
             "<div><h1>This is a heading</h1><ul><li>keria</li><li>faker</li><li>zeus</li></ul><p>the cat is in the couch</p><h3>hello friends !</h3><p>hi !!!</p></div>",
         )
+
+
+class TestExtractTitle(unittest.TestCase):
+    def test_basic(self):
+        raw_markdown = """# This is a heading
+
+        This is a paragraph of text. It has some **bold** and *italic* words inside of it.
+
+        * This is the first list item in a list block\n* This is a list item\n* This is another list item"""
+        title = extract_title(raw_markdown)
+        self.assertEqual(title, "This is a heading")
+
+        raw_markdown = "# Hello world"
+        title = extract_title(raw_markdown)
+        self.assertEqual(title, "Hello world")
+
+    def test_fail(self):
+        raw_markdown = """## This is secondary heading
+
+        This is a paragraph of text. It has some **bold** and *italic* words inside of it.
+
+        * This is the first list item in a list block\n* This is a list item\n* This is another list item"""
+        with self.assertRaises(ValueError):
+            extract_title(raw_markdown)
+
+        raw_markdown = """Hello my friend i don't care about heading
+
+        This is a paragraph of text. It has some **bold** and *italic* words inside of it.
+
+        * This is the first list item in a list block\n* This is a list item\n* This is another list item"""
+        with self.assertRaises(ValueError):
+            extract_title(raw_markdown)

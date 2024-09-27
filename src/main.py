@@ -18,7 +18,6 @@ def copy_dir(src: str, dst: str) -> None:
     if not (os.path.exists(src) and os.path.exists(dst)):
         raise ValueError("Path does not exist")
 
-    # It should first delete all the contents of the destination directory to ensure that the copy is clean.
     print(f"Removing all file and directories from {src}")
     clean_dir(dst)
 
